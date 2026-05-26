@@ -10,6 +10,7 @@ from typing import Optional
 from bleak import BleakClient
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from bleak.backends.scanner import AdvertisementData
+from bleak_retry_connector import establish_connection
 from Crypto.Cipher import AES
 
 from habluetooth import BaseHaScanner, BluetoothScannerDevice
@@ -188,10 +189,13 @@ class BM6Connector:
                     scanner.advertisement, 
                     scanner.scanner
                 )
-                async with BleakClient(
-                    scanner.ble_device, 
-                    timeout=BLEAK_CLIENT_TIMEOUT
-                ) as client:
+                client = await establish_connection(
+                    BleakClient,
+                    scanner.ble_device,
+                    self._address,
+                    max_attempts=3,
+                )
+                try:
                     _LOGGER.debug(
                         "Write to BM6 at %s characteristic %s",
                         self._address,
@@ -207,7 +211,13 @@ class BM6Connector:
                     await client.start_notify(
                         CHARACTERISTIC_UUID_NOTIFY, self._notify_callback
                     )
+                    # Wait up to BLEAK_CLIENT_TIMEOUT seconds for the notify to arrive
+                    deadline = asyncio.get_event_loop().time() + BLEAK_CLIENT_TIMEOUT
                     while self._data is None or self._data.RealTime is None:
+                        if asyncio.get_event_loop().time() >= deadline:
+                            raise BM6DeviceError(
+                                f"Timeout waiting for notify from BM6 at {self._address}"
+                            )
                         await asyncio.sleep(0.5)
                     _LOGGER.debug("Finishing wait for data from BM6 at %s", self._address)
                     await client.stop_notify(CHARACTERISTIC_UUID_NOTIFY)
@@ -225,6 +235,8 @@ class BM6Connector:
                     #     await asyncio.sleep(0.5)
                     # _LOGGER.debug("Finishing wait for data from BM6 at %s", device.address)
                     # await client.stop_notify(CHARACTERISTIC_UUID_NOTIFY)
+                finally:
+                    await client.disconnect()
             except Exception as e:
                 e.add_note = f"Using scanner {scanner.scanner.name}"
                 exceptions.append(e)

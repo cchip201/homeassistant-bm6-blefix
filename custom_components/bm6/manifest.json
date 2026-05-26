@@ -50,6 +50,6 @@
   "integration_type": "device",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/dckiller51/BM6/issues",
-  "requirements": [],
-  "version": "1.0.3"
+  "requirements": ["bleak-retry-connector>=3.0"],
+  "version": "1.0.4-cmcore"
 }
