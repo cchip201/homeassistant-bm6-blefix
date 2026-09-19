@@ -24,23 +24,7 @@
     },
     {
       "connectable": true,
-      "service_uuid": "00001800-0000-1000-8000-00805f9b34fb"
-    },
-    {
-      "connectable": true,
-      "service_uuid": "00001801-0000-1000-8000-00805f9b34fb"
-    },
-    {
-      "connectable": true,
-      "service_uuid": "0000180a-0000-1000-8000-00805f9b34fb"
-    },
-    {
-      "connectable": true,
-      "service_uuid": "0000fee0-0000-1000-8000-00805f9b34fb"
-    },
-    {
-      "connectable": true,
-      "service_uuid": "0000fff0-0000-1000-8000-00805f9b34fb"
+      "local_name": "BM6*"
     }
   ],
   "codeowners": [ "@Rafciq" ],
@@ -51,5 +35,5 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/dckiller51/BM6/issues",
   "requirements": ["bleak-retry-connector>=3.0"],
-  "version": "1.0.4-cmcore"
+  "version": "1.0.5-cmcore"
 }
